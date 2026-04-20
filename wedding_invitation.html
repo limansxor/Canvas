@@ -158,14 +158,36 @@
     opacity: 0.6;
   }
   .hero-title {
-    font-family: 'Nanum Myeongjo', serif;
-    font-weight: 700;
-    font-size: clamp(30px, 8vw, 42px);
-    letter-spacing: 0.15em;
-    margin-bottom: 22px;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(34px, 9.5vw, 48px);
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
     opacity: 0;
     animation: fadeUp 1.4s ease 0.3s forwards;
     white-space: nowrap;
+  }
+  .hero-subtitle {
+    font-family: 'Nanum Myeongjo', serif;
+    font-weight: 400;
+    font-size: clamp(11px, 3.2vw, 13px);
+    letter-spacing: 0.4em;
+    margin-bottom: 22px;
+    opacity: 0;
+    animation: fadeUp 1.4s ease 0.5s forwards;
+    color: var(--cream);
+  }
+  .hero-subtitle::before,
+  .hero-subtitle::after {
+    content: '';
+    display: inline-block;
+    width: 18px;
+    height: 1px;
+    background: var(--cream);
+    vertical-align: middle;
+    margin: 0 10px;
+    opacity: 0.5;
   }
   .hero-names {
     font-family: 'Nanum Myeongjo', serif;
@@ -432,6 +454,7 @@
   }
   .lightbox-prev { left: 20px; }
   .lightbox-next { right: 20px; }
+  .lightbox.map-mode .lightbox-nav { display: none; }
 
   /* ===== 오시는 길 ===== */
   .location {
@@ -474,6 +497,34 @@
     font-size: 15px;
     margin-bottom: 6px;
     letter-spacing: 0.05em;
+  }
+  .venue-map {
+    margin-bottom: 24px;
+    border: 1px solid rgba(107, 85, 68, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 4px 20px rgba(45, 58, 46, 0.08);
+    position: relative;
+  }
+  .venue-map img {
+    display: block;
+    width: 100%;
+    height: auto;
+    cursor: pointer;
+    transition: opacity 0.3s;
+  }
+  .venue-map img:hover { opacity: 0.92; }
+  .venue-map-hint {
+    text-align: center;
+    padding: 8px 0;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--forest-soft);
+    background: var(--paper);
+    border-top: 1px solid rgba(107, 85, 68, 0.1);
+    text-transform: uppercase;
   }
   .map-btn {
     display: flex;
@@ -703,7 +754,8 @@
     <div class="hero-overlay"></div>
     <div class="hero-date-top">We're getting married</div>
     <div class="hero-content">
-      <div class="hero-title">더 메 리 든</div>
+      <div class="hero-title">The Meriden</div>
+      <div class="hero-subtitle">더 메 리 든</div>
       <div class="hero-names">임문택 &nbsp;·&nbsp; 장지연</div>
       <div class="hero-date">2026년 6월 27일 토요일 · 오전 11시</div>
     </div>
@@ -775,6 +827,14 @@
       경기도 성남시 분당구<br>
       서현로180번길 19<br>
       <span style="font-size:12px; color:var(--forest-soft);">(지번) 서현동 256</span>
+    </div>
+
+    <div class="venue-map">
+      <img src="map.jpg"
+           alt="더메리든 약도"
+           onerror="this.onerror=null; this.src='https://lh3.googleusercontent.com/d/11gyAgq44dC4adcXx_9QggO_PNIZtS5hv=w1200';"
+           onclick="openMapLightbox(this.src)">
+      <div class="venue-map-hint">탭하여 크게 보기</div>
     </div>
 
     <div class="map-btn">
@@ -1000,6 +1060,22 @@ function navLightbox(dir) {
 document.getElementById('lightbox').addEventListener('click', (e) => {
   if (e.target.id === 'lightbox') closeLightbox();
 });
+
+/* ========== 약도 확대 보기 ========== */
+function openMapLightbox(src) {
+  const lb = document.getElementById('lightbox');
+  const img = document.getElementById('lightboxImg');
+  // 약도 모드: 좌우 네비 숨김
+  img.src = src;
+  lb.classList.add('active');
+  lb.classList.add('map-mode');
+}
+// 라이트박스 닫힐 때 map-mode 해제
+const origCloseLightbox = closeLightbox;
+closeLightbox = function() {
+  origCloseLightbox();
+  document.getElementById('lightbox').classList.remove('map-mode');
+};
 
 /* ========== 나뭇잎 흩날리는 효과 ========== */
 const leavesContainer = document.getElementById('leaves');
