@@ -61,7 +61,7 @@
     overflow: hidden;
   }
 
-  /* ===== 나뭇잎 흩날리는 효과 ===== */
+  /* ===== 꽃잎/나뭇잎 흩날리는 효과 (좌상 → 우하) ===== */
   .leaves-container {
     position: fixed;
     top: 0; left: 0;
@@ -72,26 +72,68 @@
   }
   .leaf {
     position: absolute;
-    top: -40px;
+    top: -80px;
     opacity: 0;
-    animation: fall linear infinite;
+    animation: driftDiagonal linear infinite;
+    transform-origin: center;
   }
-  @keyframes fall {
+  /* 좌측 상단에서 우측 하단으로 대각선 낙하하는 주 애니메이션 */
+  @keyframes driftDiagonal {
     0% {
-      transform: translateY(-10vh) translateX(0) rotate(0deg);
+      transform: translate(0, -10vh) rotate(0deg);
       opacity: 0;
     }
-    10% { opacity: 0.8; }
-    50% {
-      transform: translateY(50vh) translateX(40px) rotate(180deg);
+    8% {
+      opacity: 0.85;
+    }
+    25% {
+      transform: translate(25vw, 20vh) rotate(120deg);
       opacity: 0.9;
     }
-    90% { opacity: 0.7; }
+    50% {
+      transform: translate(50vw, 50vh) rotate(280deg);
+      opacity: 0.85;
+    }
+    75% {
+      transform: translate(80vw, 75vh) rotate(480deg);
+      opacity: 0.75;
+    }
+    92% {
+      opacity: 0.5;
+    }
     100% {
-      transform: translateY(110vh) translateX(-30px) rotate(720deg);
+      transform: translate(120vw, 115vh) rotate(720deg);
       opacity: 0;
     }
   }
+  /* 두 번째 패턴 - 곡선 느낌 */
+  .leaf.variant-2 {
+    animation-name: driftCurve;
+  }
+  @keyframes driftCurve {
+    0% {
+      transform: translate(0, -10vh) rotate(0deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.8;
+    }
+    30% {
+      transform: translate(35vw, 15vh) rotate(160deg);
+    }
+    55% {
+      transform: translate(55vw, 45vh) rotate(340deg);
+    }
+    80% {
+      transform: translate(90vw, 80vh) rotate(540deg);
+      opacity: 0.7;
+    }
+    100% {
+      transform: translate(125vw, 120vh) rotate(820deg);
+      opacity: 0;
+    }
+  }
+  /* 자체 회전 효과는 외부 transform에 통합됨 (더 자연스럽게) */
 
   /* ===== 메인 히어로 ===== */
   .hero {
@@ -982,9 +1024,7 @@
     <p class="ending-message reveal delay-2">
       바쁘신 와중에도<br>
       저희의 시작을 함께해 주시는<br>
-      모든 분들께 깊은 감사를 드립니다.<br><br>
-      오솔길 끝에서 만난 두 사람,<br>
-      이제 같은 길을 걷겠습니다.
+      모든 분들께 깊은 감사를 드립니다.
     </p>
     <div class="ending-couple reveal delay-3 zoom-in">임문택 &nbsp;·&nbsp; 장지연</div>
     <div class="ending-date reveal delay-4">2026 . 06 . 27 . SATURDAY</div>
@@ -1157,43 +1197,67 @@ closeLightbox = function() {
   document.getElementById('lightbox').classList.remove('map-mode');
 };
 
-/* ========== 나뭇잎 흩날리는 효과 ========== */
+/* ========== 벚꽃 꽃잎 흩날리는 효과 (좌상 → 우하) ========== */
 const leavesContainer = document.getElementById('leaves');
-const leafColors = ['#7a8c6f', '#a8b89c', '#b8945f', '#6b5544', '#4a5d4a'];
-const leafShapes = [
-  // 잎사귀 1
-  '<path d="M12 2C8 6 6 10 6 14c0 4 3 7 6 8 3-1 6-4 6-8 0-4-2-8-6-12z" />',
-  // 잎사귀 2 (둥근 형태)
-  '<path d="M12 2C6 4 4 10 6 16c2 4 4 6 6 6s4-2 6-6c2-6 0-12-6-14z" />',
-  // 단풍잎 느낌
-  '<path d="M12 2l2 5 5-1-3 4 4 3-5 1-1 5-2-5-5 1 2-4-4-3 5-1z" />'
+
+// 흰색 + 분홍 청순한 팔레트
+const petalColors = [
+  '#ffffff',   // 순백
+  '#fef0f3',   // 아이보리 핑크
+  '#fde4ea',   // 연한 블러시
+  '#fccfd9',   // 소프트 핑크
+  '#fab6c5',   // 연분홍
+  '#f8a5b8',   // 분홍
+  '#f5c9d3'    // 파스텔 핑크
+];
+
+// 벚꽃 꽃잎 모양들 (실제 벚꽃잎 형태 - 세로로 길쭉, 끝이 V자로 갈라진)
+const petalShapes = [
+  // 클래식 벚꽃잎 - 끝이 살짝 갈라진 물방울
+  '<path d="M12 2 C 8 5, 6 11, 7 17 C 8 21, 10 22, 11 20 L 12 18 L 13 20 C 14 22, 16 21, 17 17 C 18 11, 16 5, 12 2 Z" />',
+  // 벚꽃잎 변형 - 더 둥근 버전
+  '<path d="M12 3 C 7 6, 6 13, 8 19 C 9 21, 11 21, 11.5 19 L 12 17 L 12.5 19 C 13 21, 15 21, 16 19 C 18 13, 17 6, 12 3 Z" />',
+  // 벚꽃잎 옆면 (바람에 뒤집힌 모습)
+  '<path d="M12 2 C 9 4, 7 10, 8 16 C 8.5 20, 11 22, 12 20 C 13 22, 15.5 20, 16 16 C 17 10, 15 4, 12 2 Z" />'
 ];
 
 function createLeaf() {
-  const leaf = document.createElement('div');
-  leaf.className = 'leaf';
-  const size = 14 + Math.random() * 18;
-  const color = leafColors[Math.floor(Math.random() * leafColors.length)];
-  const shape = leafShapes[Math.floor(Math.random() * leafShapes.length)];
-  const duration = 8 + Math.random() * 7;
-  const delay = Math.random() * 5;
-  const startX = Math.random() * 100;
+  const petal = document.createElement('div');
+  const variant = Math.random() > 0.5 ? 'variant-2' : '';
+  petal.className = `leaf ${variant}`;
 
-  leaf.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}" style="opacity:0.75;">${shape}</svg>`;
-  leaf.style.left = startX + '%';
-  leaf.style.animationDuration = duration + 's';
-  leaf.style.animationDelay = delay + 's';
+  const size = 10 + Math.random() * 14;       // 10~24px (꽃잎 크기)
+  const color = petalColors[Math.floor(Math.random() * petalColors.length)];
+  const shape = petalShapes[Math.floor(Math.random() * petalShapes.length)];
+  const duration = 10 + Math.random() * 10;    // 10~20초 (천천히 우아하게)
+  const delay = Math.random() * 8;
 
-  leavesContainer.appendChild(leaf);
+  // 흰색일 때는 살짝 그림자 처리해서 배경과 구분되게
+  const isWhite = color === '#ffffff' || color === '#fef0f3';
+  const opacity = isWhite ? 0.75 + Math.random() * 0.2 : 0.65 + Math.random() * 0.3;
+  const shadow = isWhite ? 'filter: drop-shadow(0 1px 2px rgba(200, 150, 170, 0.3));' : '';
 
-  setTimeout(() => leaf.remove(), (duration + delay) * 1000);
+  // 시작 위치: 좌측 상단 영역
+  const startX = -20 + Math.random() * 50;
+  const startY = -15 + Math.random() * 10;
+
+  petal.innerHTML = `<svg width="${size}" height="${size * 1.3}" viewBox="0 0 24 24" fill="${color}" style="opacity:${opacity}; ${shadow}">${shape}</svg>`;
+  petal.style.left = startX + '%';
+  petal.style.top = startY + 'vh';
+  petal.style.animationDuration = duration + 's';
+  petal.style.animationDelay = delay + 's';
+
+  leavesContainer.appendChild(petal);
+
+  setTimeout(() => petal.remove(), (duration + delay) * 1000);
 }
 
 // 주기적으로 생성
-setInterval(createLeaf, 900);
-// 초기 10개
-for (let i = 0; i < 10; i++) {
-  setTimeout(createLeaf, i * 300);
+setInterval(createLeaf, 800);
+
+// 초기에 여러 개 미리 배치
+for (let i = 0; i < 16; i++) {
+  setTimeout(createLeaf, i * 200);
 }
 
 /* ========== 음악 플레이어 (항상 배경 재생) ========== */
