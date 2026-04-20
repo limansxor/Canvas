@@ -278,36 +278,43 @@
     font-weight: 700;
   }
   .family {
-    text-align: center;
     font-family: 'Nanum Myeongjo', serif;
-    font-size: 14px;
-    line-height: 2;
     color: var(--forest-deep);
-  }
-  .family-row {
-    display: flex;
-    justify-content: center;
+    display: inline-grid;
+    grid-template-columns: auto auto auto auto;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 10px 0;
+    column-gap: 14px;
+    row-gap: 14px;
   }
   .family-parents {
     color: var(--forest-mid);
     font-size: 14px;
     letter-spacing: 0.08em;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .family-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--bark);
+    opacity: 0.4;
+    justify-self: center;
+  }
+  .family-relation {
+    color: var(--bark);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    opacity: 0.75;
+    text-align: center;
+    white-space: nowrap;
   }
   .family-child {
     font-weight: 700;
     font-size: 16px;
     letter-spacing: 0.25em;
     color: var(--forest-deep);
-  }
-  .family-divider {
-    width: 1px;
-    height: 14px;
-    background: var(--bark);
-    opacity: 0.3;
+    text-align: left;
+    white-space: nowrap;
   }
 
   /* ===== 날짜 섹션 ===== */
@@ -715,19 +722,18 @@
       큰 기쁨으로 간직하겠습니다.
     </p>
     <div class="ornament">· · ·</div>
+    <div style="text-align:center;">
     <div class="family">
-      <div class="family-row">
-        <span class="family-parents">임종진 · 정혜윤</span>
-        <span class="family-divider"></span>
-        <span class="family-parents" style="color:var(--bark); font-size:11px; letter-spacing:0.2em;">의 아들</span>
-        <span class="family-child">문 택</span>
-      </div>
-      <div class="family-row">
-        <span class="family-parents">장영철 · 박영순</span>
-        <span class="family-divider"></span>
-        <span class="family-parents" style="color:var(--bark); font-size:11px; letter-spacing:0.2em;">의 딸</span>
-        <span class="family-child">지 연</span>
-      </div>
+      <span class="family-parents">임종진 · 정혜윤</span>
+      <span class="family-divider"></span>
+      <span class="family-relation">의 아들</span>
+      <span class="family-child">문 택</span>
+
+      <span class="family-parents">장영철 · 박영순</span>
+      <span class="family-divider"></span>
+      <span class="family-relation">의 딸</span>
+      <span class="family-child">지 연</span>
+    </div>
     </div>
   </section>
 
@@ -847,8 +853,9 @@
           <div class="account-info">
             <span class="role">Bride</span>
             <span class="name">장지연</span><br>
-            <span class="account-pending">계좌번호는 추후 안내드립니다</span>
+            국민은행 271201-04-277441
           </div>
+          <button class="copy-btn" onclick="copyAccount(this, '271201-04-277441')">COPY</button>
         </div>
       </div>
     </div>
