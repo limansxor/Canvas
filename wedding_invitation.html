@@ -365,13 +365,19 @@
   .invitation::before {
     content: '';
     position: absolute;
-    top: 40px;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
     width: 1px;
-    height: 40px;
+    height: 28px;
     background: var(--bark);
     opacity: 0.3;
+  }
+  /* 모바일에서는 장식선 숨김 (글자와 겹치는 문제 방지) */
+  @media (max-width: 500px) {
+    .invitation::before {
+      display: none;
+    }
   }
   .invitation-text {
     font-family: 'Gowun Batang', serif;
@@ -1200,15 +1206,12 @@ closeLightbox = function() {
 /* ========== 벚꽃 꽃잎 흩날리는 효과 (좌상 → 우하) ========== */
 const leavesContainer = document.getElementById('leaves');
 
-// 흰색 + 분홍 청순한 팔레트
+// 순백 계열 팔레트
 const petalColors = [
   '#ffffff',   // 순백
-  '#fef0f3',   // 아이보리 핑크
-  '#fde4ea',   // 연한 블러시
-  '#fccfd9',   // 소프트 핑크
-  '#fab6c5',   // 연분홍
-  '#f8a5b8',   // 분홍
-  '#f5c9d3'    // 파스텔 핑크
+  '#fafafa',   // 살짝 톤다운된 화이트
+  '#fdf8f8',   // 크림 화이트
+  '#fff5f7'    // 아주 희미한 핑크 화이트
 ];
 
 // 벚꽃 꽃잎 모양들 (실제 벚꽃잎 형태 - 세로로 길쭉, 끝이 V자로 갈라진)
@@ -1232,10 +1235,9 @@ function createLeaf() {
   const duration = 10 + Math.random() * 10;    // 10~20초 (천천히 우아하게)
   const delay = Math.random() * 8;
 
-  // 흰색일 때는 살짝 그림자 처리해서 배경과 구분되게
-  const isWhite = color === '#ffffff' || color === '#fef0f3';
-  const opacity = isWhite ? 0.75 + Math.random() * 0.2 : 0.65 + Math.random() * 0.3;
-  const shadow = isWhite ? 'filter: drop-shadow(0 1px 2px rgba(200, 150, 170, 0.3));' : '';
+  // 흰 꽃잎은 배경에 묻히지 않도록 은은한 분홍 그림자 적용
+  const opacity = 0.75 + Math.random() * 0.2;
+  const shadow = 'filter: drop-shadow(0 1px 3px rgba(200, 140, 165, 0.35));';
 
   // 시작 위치: 좌측 상단 영역
   const startX = -20 + Math.random() * 50;
