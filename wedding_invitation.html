@@ -2,7 +2,12 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
+<meta name="HandheldFriendly" content="true">
+<meta name="MobileOptimized" content="width">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
 <title>임문택 ❦ 장지연 · 2026.06.27</title>
 
 <!-- ===== 링크 공유 시 썸네일 (카톡/페북/트위터 등) ===== -->
@@ -43,6 +48,13 @@
     --shadow: rgba(45, 58, 46, 0.15);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html {
+    /* 카톡 인앱 브라우저 확대 차단 */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    touch-action: pan-y;
+    overflow-x: hidden;
+  }
   html, body {
     background: var(--paper);
     color: var(--forest-deep);
@@ -51,19 +63,23 @@
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     /* 스크롤 바운스 시 이미지 왜곡 방지 */
-    overscroll-behavior-y: contain;
-    /* iOS Safari: 핀치 줌 방지 */
+    overscroll-behavior: contain;
+    /* 모바일 핀치 줌 차단 */
     touch-action: pan-y;
+    /* iOS 스크롤 바운스 차단 */
+    -webkit-overflow-scrolling: auto;
   }
   img {
     /* 모든 이미지 확대/축소 애니메이션 방지 */
     max-width: 100%;
     -webkit-user-drag: none;
     user-select: none;
+    -webkit-touch-callout: none;
   }
   /* 히어로 영역에서는 모든 변형 차단 */
   .hero, .hero * {
     -webkit-touch-callout: none;
+    touch-action: pan-y;
   }
   .wrapper {
     max-width: 480px;
@@ -159,6 +175,9 @@
     max-height: 900px;
     overflow: hidden;
     background: var(--forest-deep);
+    /* 레이아웃/페인트 격리 - 외부 영향 차단 */
+    contain: layout paint size style;
+    isolation: isolate;
   }
   .hero-bg {
     position: absolute;
@@ -1477,6 +1496,52 @@
 <!-- 음악 업로드 input 제거됨 -->
 
 <script>
+/* ========== 확대/축소 강제 차단 (카톡 인앱 브라우저 대응) ========== */
+(function() {
+  // 더블 탭 확대 방지
+  let lastTouchEnd = 0;
+  document.addEventListener('touchend', function(e) {
+    const now = Date.now();
+    if (now - lastTouchEnd <= 300) {
+      e.preventDefault();
+    }
+    lastTouchEnd = now;
+  }, { passive: false });
+
+  // 멀티 터치 (핀치 줌) 차단
+  document.addEventListener('touchstart', function(e) {
+    if (e.touches.length > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  document.addEventListener('touchmove', function(e) {
+    if (e.touches.length > 1) {
+      e.preventDefault();
+    }
+    // 스케일이 1이 아니면 강제로 1로 복귀
+    if (e.scale !== undefined && e.scale !== 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  // 제스처 이벤트 차단 (iOS Safari)
+  document.addEventListener('gesturestart', function(e) {
+    e.preventDefault();
+  }, { passive: false });
+  document.addEventListener('gesturechange', function(e) {
+    e.preventDefault();
+  }, { passive: false });
+  document.addEventListener('gestureend', function(e) {
+    e.preventDefault();
+  }, { passive: false });
+
+  // Ctrl + 휠 확대 차단 (데스크톱)
+  document.addEventListener('wheel', function(e) {
+    if (e.ctrlKey) e.preventDefault();
+  }, { passive: false });
+})();
+
 /* ========== D-DAY 카운트다운 ========== */
 (function() {
   const WEDDING_DATE = new Date('2026-06-27T11:00:00+09:00'); // 한국 시간
