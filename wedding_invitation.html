@@ -456,7 +456,7 @@
     align-items: center;
     gap: 4px;
     opacity: 0;
-    animation: fadeUp 1.4s ease 1.5s forwards, bounce 2s ease-in-out 2.5s infinite;
+    animation: scrollHintFade 1.4s ease 1.5s forwards, scrollHintBounce 2s ease-in-out 2.5s infinite;
     pointer-events: none;
   }
   .scroll-hint-text {
@@ -471,7 +471,17 @@
     height: 20px;
     opacity: 0.7;
   }
-  @keyframes bounce {
+  @keyframes scrollHintFade {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+  @keyframes scrollHintBounce {
     0%, 100% { transform: translateX(-50%) translateY(0); }
     50% { transform: translateX(-50%) translateY(8px); }
   }
@@ -1231,7 +1241,7 @@
 (function() {
   // URL에 버전 파라미터가 없으면 추가하고 새로고침
   const urlParams = new URLSearchParams(window.location.search);
-  const currentVersion = 'v20260421-07'; // 배포할 때마다 이 값 변경!
+  const currentVersion = 'v20260421-09'; // 배포할 때마다 이 값 변경!
   const savedVersion = urlParams.get('v');
 
   if (savedVersion !== currentVersion) {
@@ -1322,8 +1332,6 @@
            alt="사람이 온다는 건 실은 어마어마한 일이다 - 정현종, 방문객"
            onerror="this.parentElement.style.display='none'">
     </div>
-
- 
 
     <div class="ornament reveal delay-3">· · ·</div>
     <div style="text-align:center;" class="reveal delay-4">
