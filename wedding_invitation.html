@@ -52,12 +52,18 @@
     -webkit-font-smoothing: antialiased;
     /* 스크롤 바운스 시 이미지 왜곡 방지 */
     overscroll-behavior-y: contain;
+    /* iOS Safari: 핀치 줌 방지 */
+    touch-action: pan-y;
   }
   img {
     /* 모든 이미지 확대/축소 애니메이션 방지 */
     max-width: 100%;
     -webkit-user-drag: none;
     user-select: none;
+  }
+  /* 히어로 영역에서는 모든 변형 차단 */
+  .hero, .hero * {
+    -webkit-touch-callout: none;
   }
   .wrapper {
     max-width: 480px;
@@ -172,30 +178,18 @@
     object-position: center 30%;
     filter: brightness(0.88) saturate(1.05);
     display: block;
-    /* 스크롤 중 확대 방지 */
+    /* 모든 확대/변형 완전 차단 */
     pointer-events: none;
     user-select: none;
     -webkit-user-drag: none;
-    /* Ken Burns 영화적 효과 - 천천히 줌인/팬 */
-    animation: kenBurns 20s ease-in-out infinite alternate;
-    transform-origin: center 40%;
-  }
-  @keyframes kenBurns {
-    0% {
-      transform: scale(1) translate(0, 0);
-    }
-    50% {
-      transform: scale(1.08) translate(-1%, -1%);
-    }
-    100% {
-      transform: scale(1.12) translate(1%, 0.5%);
-    }
-  }
-  /* 접근성: 모션 줄이기 선호하는 사용자에겐 효과 중지 */
-  @media (prefers-reduced-motion: reduce) {
-    .hero-bg img {
-      animation: none;
-    }
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+    will-change: auto;
+    /* iOS Safari 대응 */
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
   }
   .hero-overlay {
     position: absolute;
