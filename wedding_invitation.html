@@ -169,15 +169,29 @@
   .hero {
     position: relative;
     width: 100%;
-    height: 100vh;
-    height: 100dvh;
-    min-height: 600px;
+    /* 아이폰 비율 고정 (9:19.5 ≈ 0.462) */
+    aspect-ratio: 9 / 19.5;
     max-height: 900px;
     overflow: hidden;
     background: var(--forest-deep);
     /* 레이아웃/페인트 격리 - 외부 영향 차단 */
     contain: layout paint size style;
     isolation: isolate;
+  }
+  /* 구형 브라우저 지원 (aspect-ratio 미지원 시) */
+  @supports not (aspect-ratio: 9 / 19.5) {
+    .hero {
+      height: 0;
+      padding-bottom: 216.67%; /* 19.5 / 9 * 100 */
+    }
+  }
+  /* 랜드스케이프(가로모드) 또는 태블릿 대응 - 최대 크기 제한 */
+  @media (min-aspect-ratio: 1/1) {
+    .hero {
+      aspect-ratio: auto;
+      height: 100vh;
+      max-height: 900px;
+    }
   }
   .hero-bg {
     position: absolute;
@@ -202,13 +216,15 @@
     user-select: none;
     -webkit-user-drag: none;
     transform: none !important;
+    -webkit-transform: none !important;
     animation: none !important;
     transition: none !important;
     will-change: auto;
-    /* iOS Safari 대응 */
-    -webkit-transform: translateZ(0);
-    -webkit-backface-visibility: hidden;
+    /* iOS Safari: 이미지 고정 렌더링 */
     backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    /* 리사이즈 시 재계산 방지 */
+    contain: strict;
   }
   .hero-overlay {
     position: absolute;
@@ -568,8 +584,8 @@
 
   /* ===== 손글씨 이미지 (마스크 애니메이션) ===== */
   .handwriting {
-    margin: 20px auto 30px;
-    max-width: 320px;
+    margin: 30px auto 40px;
+    max-width: 400px;
     padding: 0 20px;
     text-align: center;
   }
@@ -581,14 +597,17 @@
     /* 스크롤 reveal로 보일 때 마스크 애니메이션 실행 */
     clip-path: inset(0 100% 0 0);
     -webkit-clip-path: inset(0 100% 0 0);
-    transition: clip-path 3s cubic-bezier(0.65, 0, 0.35, 1),
-                -webkit-clip-path 3s cubic-bezier(0.65, 0, 0.35, 1);
+    transition: clip-path 4s cubic-bezier(0.65, 0, 0.35, 1),
+                -webkit-clip-path 4s cubic-bezier(0.65, 0, 0.35, 1);
+    /* 이미지 자체 색상 살리기 위해 살짝 대비 조정 */
+    filter: contrast(1.15) brightness(0.95);
+    mix-blend-mode: multiply;
   }
   .handwriting.in-view img {
     clip-path: inset(0 0 0 0);
     -webkit-clip-path: inset(0 0 0 0);
   }
-  /* 위→아래 방향 변형 */
+  /* 위→아래 방향 변형 (장막이 내려오는 느낌) */
   .handwriting.direction-down img {
     clip-path: inset(0 0 100% 0);
     -webkit-clip-path: inset(0 0 100% 0);
@@ -597,7 +616,7 @@
     clip-path: inset(0 0 0 0);
     -webkit-clip-path: inset(0 0 0 0);
   }
-  /* 대각선(좌상→우하) 변형 - 두 효과 조합 */
+  /* 대각선(좌상→우하) 변형 */
   .handwriting.direction-diagonal img {
     clip-path: inset(0 100% 100% 0);
     -webkit-clip-path: inset(0 100% 100% 0);
@@ -1283,24 +1302,13 @@
     <div class="section-label reveal">INVITATION</div>
     <h2 class="section-title reveal delay-1">초 대 합 니 다</h2>
 
-    <!-- 손글씨 이미지 (마스크 애니메이션) -->
-    <div class="handwriting reveal delay-2">
+    <!-- 손글씨 이미지 (위→아래 장막 애니메이션) -->
+    <div class="handwriting reveal delay-2 direction-down">
       <img src="handwriting.png"
-           alt="손글씨 메시지"
-           onerror="this.style.display='none'">
+           alt="사람이 온다는 건 실은 어마어마한 일이다 - 정현종, 방문객"
+           onerror="this.parentElement.style.display='none'">
     </div>
 
-    <p class="invitation-text reveal delay-2">
-      사람이 온다는 건 실은 어마어마한 일이다.<br>
-      그는 그의 과거와 현재와 그리고<br>
-      그의 미래와 함께 오기 때문이다.<br>
-      <span class="emphasis">한 사람의 일생이 오기 때문이다.</span>
-      <br><br>
-      <span class="poem-author">– 정현종, '방문객'</span>
-      <br><br>
-      저희 두 사람이 함께하는 새로운 시작에<br>
-      귀한 발걸음으로 축복해 주시면 감사하겠습니다.
-    </p>
     <div class="ornament reveal delay-3">· · ·</div>
     <div style="text-align:center;" class="reveal delay-4">
     <div class="family">
