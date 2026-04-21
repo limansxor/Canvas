@@ -50,6 +50,14 @@
     line-height: 1.75;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
+    /* 스크롤 바운스 시 이미지 왜곡 방지 */
+    overscroll-behavior-y: contain;
+  }
+  img {
+    /* 모든 이미지 확대/축소 애니메이션 방지 */
+    max-width: 100%;
+    -webkit-user-drag: none;
+    user-select: none;
   }
   .wrapper {
     max-width: 480px;
@@ -139,23 +147,40 @@
   .hero {
     position: relative;
     width: 100%;
-    height: 100vh;
-    height: 100dvh;
-    min-height: 640px;
+    aspect-ratio: 3 / 4;
     max-height: 820px;
     overflow: hidden;
-    isolation: isolate;
+    background: var(--forest-deep);
+  }
+  /* 구형 브라우저 지원 (aspect-ratio 미지원 시) */
+  @supports not (aspect-ratio: 3 / 4) {
+    .hero {
+      height: 0;
+      padding-bottom: 133.33%;
+    }
   }
   .hero-bg {
     position: absolute;
     inset: 0;
-    background-size: cover;
-    background-position: center 30%;
-    background-repeat: no-repeat;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .hero-bg img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
     filter: brightness(0.88) saturate(1.05);
-    will-change: auto;
-    transform: translateZ(0);
-    backface-visibility: hidden;
+    display: block;
+    /* 스크롤 중 확대 방지 */
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
   }
   .hero-overlay {
     position: absolute;
@@ -364,6 +389,46 @@
   }
 
   /* ===== 초대의 글 ===== */
+  /* ===== 손글씨 이미지 (마스크 애니메이션) ===== */
+  .handwriting {
+    margin: 20px auto 30px;
+    max-width: 320px;
+    padding: 0 20px;
+    text-align: center;
+  }
+  .handwriting img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+    /* 스크롤 reveal로 보일 때 마스크 애니메이션 실행 */
+    clip-path: inset(0 100% 0 0);
+    -webkit-clip-path: inset(0 100% 0 0);
+    transition: clip-path 3s cubic-bezier(0.65, 0, 0.35, 1),
+                -webkit-clip-path 3s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  .handwriting.in-view img {
+    clip-path: inset(0 0 0 0);
+    -webkit-clip-path: inset(0 0 0 0);
+  }
+  /* 위→아래 방향 변형 */
+  .handwriting.direction-down img {
+    clip-path: inset(0 0 100% 0);
+    -webkit-clip-path: inset(0 0 100% 0);
+  }
+  .handwriting.direction-down.in-view img {
+    clip-path: inset(0 0 0 0);
+    -webkit-clip-path: inset(0 0 0 0);
+  }
+  /* 대각선(좌상→우하) 변형 - 두 효과 조합 */
+  .handwriting.direction-diagonal img {
+    clip-path: inset(0 100% 100% 0);
+    -webkit-clip-path: inset(0 100% 100% 0);
+  }
+  .handwriting.direction-diagonal.in-view img {
+    clip-path: inset(0 0 0 0);
+    -webkit-clip-path: inset(0 0 0 0);
+  }
   .invitation {
     background: linear-gradient(180deg, var(--paper) 0%, #f0ebdd 100%);
     position: relative;
@@ -856,7 +921,9 @@
 
   <!-- 메인 히어로 -->
   <section class="hero" style="padding:0;">
-    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-bg" id="heroBg">
+      <img src="main.jpg" alt="" draggable="false">
+    </div>
     <div class="hero-overlay"></div>
     <div class="hero-date-top">We're getting married</div>
     <div class="hero-content">
@@ -871,6 +938,14 @@
   <section class="invitation">
     <div class="section-label reveal">INVITATION</div>
     <h2 class="section-title reveal delay-1">초 대 합 니 다</h2>
+
+    <!-- 손글씨 이미지 (마스크 애니메이션) -->
+    <div class="handwriting reveal delay-2">
+      <img src="handwriting.png"
+           alt="손글씨 메시지"
+           onerror="this.style.display='none'">
+    </div>
+
     <p class="invitation-text reveal delay-2">
       사람이 온다는 건 실은 어마어마한 일이다.<br>
       그는 그의 과거와 현재와 그리고<br>
@@ -1087,8 +1162,7 @@ const gdrive = (id) => `https://lh3.googleusercontent.com/d/${id}=w800`;
 // 메인 이미지
 const MAIN_IMG = '1DpvNIm-KkoSlUqFLYWaI0dme362hQgd8';
 
-/* ========== 메인 이미지 설정 ========== */
-document.getElementById('heroBg').style.backgroundImage = `url('main.jpg')`;
+/* ========== 메인 이미지는 HTML <img>로 직접 설정됨 ========== */
 
 /* ========== 갤러리 구성 - JS Masonry (양 열 높이 균등화) ========== */
 // 링크 준 순서 유지하면서, 높이가 낮은 열에 하나씩 배치
