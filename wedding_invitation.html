@@ -147,17 +147,12 @@
   .hero {
     position: relative;
     width: 100%;
-    aspect-ratio: 3 / 4;
-    max-height: 820px;
+    height: 100vh;
+    height: 100dvh;
+    min-height: 600px;
+    max-height: 900px;
     overflow: hidden;
     background: var(--forest-deep);
-  }
-  /* 구형 브라우저 지원 (aspect-ratio 미지원 시) */
-  @supports not (aspect-ratio: 3 / 4) {
-    .hero {
-      height: 0;
-      padding-bottom: 133.33%;
-    }
   }
   .hero-bg {
     position: absolute;
@@ -219,7 +214,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
-    padding: 0 20px 80px;
+    padding: 0 20px 100px;
     text-align: center;
     color: var(--cream);
     z-index: 2;
@@ -420,6 +415,39 @@
     background: var(--bark);
     margin: 18px auto 0;
     opacity: 0.4;
+  }
+
+  /* ===== 스크롤 유도 힌트 ===== */
+  .scroll-hint {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--cream);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    opacity: 0;
+    animation: fadeUp 1.4s ease 1.5s forwards, bounce 2s ease-in-out 2.5s infinite;
+    pointer-events: none;
+  }
+  .scroll-hint-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    opacity: 0.75;
+    text-transform: uppercase;
+  }
+  .scroll-hint-arrow {
+    width: 20px;
+    height: 20px;
+    opacity: 0.7;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
   }
 
   /* ===== 초대의 글 ===== */
@@ -1197,6 +1225,14 @@
       <div class="hero-subtitle">더 메 리 든</div>
       <div class="hero-names"><span class="hero-role">신랑</span>임문택<span class="hero-sep">·</span><span class="hero-role">신부</span>장지연</div>
       <div class="hero-date">2026년 6월 27일 토요일 · 오전 11시</div>
+    </div>
+
+    <!-- 스크롤 유도 힌트 -->
+    <div class="scroll-hint">
+      <span class="scroll-hint-text">Scroll</span>
+      <svg class="scroll-hint-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 10l5 5 5-5"/>
+      </svg>
     </div>
   </section>
 
