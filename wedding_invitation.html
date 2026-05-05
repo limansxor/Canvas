@@ -591,13 +591,21 @@
 
   /* ===== 손글씨 이미지 (마스크 애니메이션) ===== */
   .handwriting {
-    margin: 30px auto 40px;
-    max-width: 400px;
-    padding: 0 20px;
+    /* 섹션 좌우 패딩(24px)을 무효화하여 wrapper 폭(최대 480px) 끝까지 확대 */
+    margin: 30px -24px 40px;
+    max-width: none;
+    padding: 0;
     text-align: center;
+  }
+  @media (max-width: 400px) {
+    .handwriting {
+      /* 모바일 섹션 패딩(20px)에 맞춰 조정 */
+      margin: 30px -20px 40px;
+    }
   }
   .handwriting img {
     display: block;
+    width: 100%;
     max-width: 100%;
     height: auto;
     margin: 0 auto;
@@ -1329,7 +1337,7 @@
 (function() {
   // URL에 버전 파라미터가 없으면 추가하고 새로고침
   const urlParams = new URLSearchParams(window.location.search);
-  const currentVersion = 'v20260504-03'; // 배포할 때마다 이 값 변경!
+  const currentVersion = 'v20260504-04'; // 배포할 때마다 이 값 변경!
   const savedVersion = urlParams.get('v');
 
   if (savedVersion !== currentVersion) {
