@@ -601,12 +601,10 @@
     max-width: 100%;
     height: auto;
     margin: 0 auto;
-    /* 스크롤 reveal로 보일 때 마스크 애니메이션 실행 */
     clip-path: inset(0 100% 0 0);
     -webkit-clip-path: inset(0 100% 0 0);
     transition: clip-path 4s cubic-bezier(0.65, 0, 0.35, 1),
                 -webkit-clip-path 4s cubic-bezier(0.65, 0, 0.35, 1);
-    /* 이미지 자체 색상 살리기 위해 살짝 대비 조정 */
     filter: contrast(1.15) brightness(0.95);
     mix-blend-mode: multiply;
   }
@@ -614,7 +612,6 @@
     clip-path: inset(0 0 0 0);
     -webkit-clip-path: inset(0 0 0 0);
   }
-  /* 위→아래 방향 변형 (장막이 내려오는 느낌) */
   .handwriting.direction-down img {
     clip-path: inset(0 0 100% 0);
     -webkit-clip-path: inset(0 0 100% 0);
@@ -623,7 +620,6 @@
     clip-path: inset(0 0 0 0);
     -webkit-clip-path: inset(0 0 0 0);
   }
-  /* 대각선(좌상→우하) 변형 */
   .handwriting.direction-diagonal img {
     clip-path: inset(0 100% 100% 0);
     -webkit-clip-path: inset(0 100% 100% 0);
@@ -632,6 +628,94 @@
     clip-path: inset(0 0 0 0);
     -webkit-clip-path: inset(0 0 0 0);
   }
+
+  /* ===== 시 이미지 슬라이드 갤러리 ===== */
+  .poem-slider {
+    margin: 30px auto 40px;
+    max-width: 400px;
+    padding: 0 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .poem-slider-track {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 4px;
+    /* 위→아래 마스크 애니메이션 */
+    clip-path: inset(0 0 100% 0);
+    -webkit-clip-path: inset(0 0 100% 0);
+    transition: clip-path 4s cubic-bezier(0.65, 0, 0.35, 1),
+                -webkit-clip-path 4s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  .poem-slider.in-view .poem-slider-track {
+    clip-path: inset(0 0 0 0);
+    -webkit-clip-path: inset(0 0 0 0);
+  }
+  .poem-slide {
+    width: 100%;
+    display: none;
+  }
+  .poem-slide.active {
+    display: block;
+    animation: poemFadeIn 0.8s ease;
+  }
+  @keyframes poemFadeIn {
+    from { opacity: 0; transform: scale(1.02); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .poem-slide img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+  .poem-slider-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .poem-slider-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--moss);
+    opacity: 0.4;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    transition: all 0.3s;
+  }
+  .poem-slider-dot.active {
+    opacity: 1;
+    background: var(--forest-mid);
+    transform: scale(1.3);
+  }
+  .poem-slider-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.6);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--forest-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: background 0.3s;
+    backdrop-filter: blur(4px);
+  }
+  .poem-slider-nav:hover {
+    background: rgba(255,255,255,0.85);
+  }
+  .poem-slider-prev { left: 26px; }
+  .poem-slider-next { right: 26px; }
   .invitation {
     background: linear-gradient(180deg, var(--paper) 0%, #f0ebdd 100%);
     position: relative;
@@ -1004,6 +1088,10 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
+    border-top: 1px dashed rgba(107, 85, 68, 0.18);
+  }
+  .account-row:first-child {
+    border-top: none;
   }
   .account-info {
     font-family: 'Gowun Batang', serif;
@@ -1241,7 +1329,7 @@
 (function() {
   // URL에 버전 파라미터가 없으면 추가하고 새로고침
   const urlParams = new URLSearchParams(window.location.search);
-  const currentVersion = 'v20260421-09'; // 배포할 때마다 이 값 변경!
+  const currentVersion = 'v20260504-03'; // 배포할 때마다 이 값 변경!
   const savedVersion = urlParams.get('v');
 
   if (savedVersion !== currentVersion) {
@@ -1461,6 +1549,22 @@
           </div>
           <button class="copy-btn" onclick="copyAccount(this, '1002-888-010112')">COPY</button>
         </div>
+        <div class="account-row">
+          <div class="account-info">
+            <span class="role">Father</span>
+            <span class="name">임종진</span><br>
+            농협 485-0125-2028-759
+          </div>
+          <button class="copy-btn" onclick="copyAccount(this, '48501252028759')">COPY</button>
+        </div>
+        <div class="account-row">
+          <div class="account-info">
+            <span class="role">Mother</span>
+            <span class="name">정혜윤</span><br>
+            기업은행 462-018503-01-011
+          </div>
+          <button class="copy-btn" onclick="copyAccount(this, '46201850301011')">COPY</button>
+        </div>
       </div>
     </div>
 
@@ -1476,6 +1580,22 @@
             국민은행 271201-04-277441
           </div>
           <button class="copy-btn" onclick="copyAccount(this, '271201-04-277441')">COPY</button>
+        </div>
+        <div class="account-row">
+          <div class="account-info">
+            <span class="role">Father</span>
+            <span class="name">장영철</span><br>
+            농협 417060-56-009186
+          </div>
+          <button class="copy-btn" onclick="copyAccount(this, '417060-56-009186')">COPY</button>
+        </div>
+        <div class="account-row">
+          <div class="account-info">
+            <span class="role">Mother</span>
+            <span class="name">박영순</span><br>
+            우체국 300723-02-036961
+          </div>
+          <button class="copy-btn" onclick="copyAccount(this, '300723-02-036961')">COPY</button>
         </div>
       </div>
     </div>
