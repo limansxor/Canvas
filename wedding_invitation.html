@@ -1841,20 +1841,50 @@ const galleryItems = galleryOrder.map((id, i) => {
 });
 
 // 이미지 로드 후 각 아이템의 높이를 grid-row span으로 설정
+// 두 컬럼의 끝 부분을 일치시키기 위해 명시적 컬럼/행 배치 + 마지막 아이템 높이 보정
 function layoutMasonry() {
   const gridStyles = window.getComputedStyle(grid);
   const rowHeight = parseInt(gridStyles.getPropertyValue('grid-auto-rows'));
   const rowGap = parseInt(gridStyles.getPropertyValue('grid-row-gap'));
   const colWidth = (grid.clientWidth - rowGap) / 2;
 
-  galleryItems.forEach(item => {
+  // 모든 이미지의 자연 사이즈가 준비되었는지 확인
+  const itemData = [];
+  for (const item of galleryItems) {
     const img = item.querySelector('img');
-    if (!img.naturalWidth) return;
+    if (!img.naturalWidth) return; // 모든 이미지 로드 후 다시 호출됨
     const aspectRatio = img.naturalHeight / img.naturalWidth;
-    const itemHeight = colWidth * aspectRatio;
-    const rowSpan = Math.ceil((itemHeight + rowGap) / (rowHeight + rowGap));
-    item.style.gridRowEnd = `span ${rowSpan}`;
-    item.style.height = `${itemHeight}px`;
+    itemData.push({ item, height: colWidth * aspectRatio });
+  }
+
+  // 더 짧은 컬럼에 다음 이미지를 배치 (greedy 균형)
+  const cols = [
+    { items: [], height: 0 },
+    { items: [], height: 0 }
+  ];
+  itemData.forEach(d => {
+    const target = cols[0].height <= cols[1].height ? 0 : 1;
+    cols[target].items.push({ ...d });
+    cols[target].height += d.height + rowGap;
+  });
+
+  // 두 컬럼의 끝을 정확히 맞추기 위해 짧은 컬럼의 마지막 아이템 높이를 늘림
+  const diff = Math.abs(cols[0].height - cols[1].height);
+  const shorterIdx = cols[0].height < cols[1].height ? 0 : 1;
+  if (diff > 0 && cols[shorterIdx].items.length > 0) {
+    cols[shorterIdx].items[cols[shorterIdx].items.length - 1].height += diff;
+  }
+
+  // 명시적 grid-column / grid-row 적용
+  cols.forEach((col, colIdx) => {
+    let currentRow = 1;
+    col.items.forEach(({ item, height }) => {
+      const rowSpan = Math.max(1, Math.ceil((height + rowGap) / (rowHeight + rowGap)));
+      item.style.gridColumn = `${colIdx + 1}`;
+      item.style.gridRow = `${currentRow} / span ${rowSpan}`;
+      item.style.height = `${height}px`;
+      currentRow += rowSpan;
+    });
   });
 }
 
