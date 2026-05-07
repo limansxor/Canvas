@@ -1344,7 +1344,7 @@
 (function() {
   // URL에 버전 파라미터가 없으면 추가하고 새로고침
   const urlParams = new URLSearchParams(window.location.search);
-  const currentVersion = 'v20260504-04'; // 배포할 때마다 이 값 변경!
+  const currentVersion = 'v20260504-05'; // 배포할 때마다 이 값 변경!
   const savedVersion = urlParams.get('v');
 
   if (savedVersion !== currentVersion) {
@@ -1519,8 +1519,7 @@
         <div class="transport-icon"><span class="ico">🚗</span>자가용 이용</div>
         <div class="transport-desc">
           네비게이션 <strong>'더메리든'</strong> 또는 <strong>'비전월드 주차장'</strong> 검색<br>
-          건물 내 지하 주차장 이용 (2시간 무료)<br>
-          <span style="color:var(--forest-soft); font-size:12px;">※ 만차 시 서현역 환승 공영주차장 이용</span>
+          건물 내 주차장 이용
         </div>
       </div>
       <div class="transport-item reveal from-left">
