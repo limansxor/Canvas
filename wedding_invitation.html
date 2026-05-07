@@ -844,23 +844,30 @@
     font-weight: 700;
   }
 
-  /* ===== 갤러리 - JS Masonry ===== */
+  /* ===== 갤러리 - JS Masonry (flex 기반 두 컬럼) ===== */
   .gallery {
     background: var(--paper);
   }
   .gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: 2px;
+    display: flex;
     gap: 6px;
     margin-bottom: 20px;
+    align-items: flex-start;
+  }
+  .gallery-col {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
   .gallery-item {
     position: relative;
     overflow: hidden;
     cursor: pointer;
     background: var(--moss);
-    display: block;
+    width: 100%;
+    flex: 0 0 auto;
   }
   .gallery-item img {
     width: 100%;
@@ -1830,23 +1837,29 @@ const galleryOrder = [
 const allImages = galleryOrder.map(id => gdrive(id).replace('=w800', '=w1600'));
 const grid = document.getElementById('galleryGrid');
 
-// 아이템들을 먼저 생성
+// 두 개의 flex 컬럼 컨테이너 생성
+const colA = document.createElement('div');
+const colB = document.createElement('div');
+colA.className = 'gallery-col';
+colB.className = 'gallery-col';
+grid.appendChild(colA);
+grid.appendChild(colB);
+
+// 아이템들을 먼저 생성하고 임시로 양 컬럼에 분배 (이미지 로드 시 재배치)
 const galleryItems = galleryOrder.map((id, i) => {
   const div = document.createElement('div');
   div.className = 'gallery-item';
   div.innerHTML = `<img src="${gdrive(id)}" alt="photo ${i+1}" loading="lazy" onerror="this.style.opacity=0.3">`;
   div.onclick = () => openLightbox(i);
-  grid.appendChild(div);
+  (i % 2 === 0 ? colA : colB).appendChild(div);
   return div;
 });
 
-// 이미지 로드 후 각 아이템의 높이를 grid-row span으로 설정
-// 두 컬럼의 끝 부분을 일치시키기 위해 명시적 컬럼/행 배치 + 마지막 아이템 높이 보정
+// 이미지 로드 후 두 flex 컬럼에 픽셀 정확도로 분배 + 끝단 일치
 function layoutMasonry() {
-  const gridStyles = window.getComputedStyle(grid);
-  const rowHeight = parseInt(gridStyles.getPropertyValue('grid-auto-rows'));
-  const rowGap = parseInt(gridStyles.getPropertyValue('grid-row-gap'));
-  const colWidth = (grid.clientWidth - rowGap) / 2;
+  const gap = 6;
+  const colWidth = (grid.clientWidth - gap) / 2;
+  if (colWidth <= 0) return;
 
   // 모든 이미지의 자연 사이즈가 준비되었는지 확인
   const itemData = [];
@@ -1859,13 +1872,14 @@ function layoutMasonry() {
 
   // 더 짧은 컬럼에 다음 이미지를 배치 (greedy 균형)
   const cols = [
-    { items: [], height: 0 },
-    { items: [], height: 0 }
+    { el: colA, items: [], height: 0 },
+    { el: colB, items: [], height: 0 }
   ];
   itemData.forEach(d => {
     const target = cols[0].height <= cols[1].height ? 0 : 1;
+    if (cols[target].items.length > 0) cols[target].height += gap;
     cols[target].items.push({ ...d });
-    cols[target].height += d.height + rowGap;
+    cols[target].height += d.height;
   });
 
   // 두 컬럼의 끝을 정확히 맞추기 위해 짧은 컬럼의 마지막 아이템 높이를 늘림
@@ -1875,15 +1889,13 @@ function layoutMasonry() {
     cols[shorterIdx].items[cols[shorterIdx].items.length - 1].height += diff;
   }
 
-  // 명시적 grid-column / grid-row 적용
-  cols.forEach((col, colIdx) => {
-    let currentRow = 1;
+  // 컬럼 비우고 분배 결과 적용
+  colA.innerHTML = '';
+  colB.innerHTML = '';
+  cols.forEach(col => {
     col.items.forEach(({ item, height }) => {
-      const rowSpan = Math.max(1, Math.ceil((height + rowGap) / (rowHeight + rowGap)));
-      item.style.gridColumn = `${colIdx + 1}`;
-      item.style.gridRow = `${currentRow} / span ${rowSpan}`;
       item.style.height = `${height}px`;
-      currentRow += rowSpan;
+      col.el.appendChild(item);
     });
   });
 }
