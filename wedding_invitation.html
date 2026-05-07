@@ -1344,7 +1344,7 @@
 (function() {
   // URL에 버전 파라미터가 없으면 추가하고 새로고침
   const urlParams = new URLSearchParams(window.location.search);
-  const currentVersion = 'v20260504-05'; // 배포할 때마다 이 값 변경!
+  const currentVersion = 'v20260504-06'; // 배포할 때마다 이 값 변경!
   const savedVersion = urlParams.get('v');
 
   if (savedVersion !== currentVersion) {
@@ -1844,80 +1844,110 @@ colB.className = 'gallery-col';
 grid.appendChild(colA);
 grid.appendChild(colB);
 
-// 아이템들을 먼저 생성하고 임시로 양 컬럼에 분배 (이미지 로드 시 재배치)
+const GAP = 6;
+
+// galleryOrder의 그룹 메타에 따른 추정 종횡비(height/width)
+// 0~5: 가로 긴(6장) ≈ 2/3, 6~14: 세로 긴(9장) ≈ 3/2,
+// 15~16: 신부 세로(2장) ≈ 3/2, 17: 정사각형 ≈ 1
+function estimateAspect(i) {
+  if (i < 6) return 2 / 3;
+  if (i < 17) return 3 / 2;
+  return 1;
+}
+
+function getColWidth() {
+  return (grid.clientWidth - GAP) / 2;
+}
+
+// === 핵심 변경 ===
+// 페이지 첫 진입 시 추정 종횡비로 두 컬럼에 결정적으로 분배해 두고,
+// 이후 실제 이미지가 로드되어도 컬럼은 절대 다시 섞지 않는다.
+// → "스크롤 중 갑자기 순서가 바뀌는" 현상을 원천 차단.
+const itemColumns = []; // i → 0 or 1
+const colEstHeights = [0, 0];
 const galleryItems = galleryOrder.map((id, i) => {
   const div = document.createElement('div');
   div.className = 'gallery-item';
   div.innerHTML = `<img src="${gdrive(id)}" alt="photo ${i+1}" loading="lazy" onerror="this.style.opacity=0.3">`;
   div.onclick = () => openLightbox(i);
-  (i % 2 === 0 ? colA : colB).appendChild(div);
+
+  const aspect = estimateAspect(i);
+  const target = colEstHeights[0] <= colEstHeights[1] ? 0 : 1;
+  itemColumns.push(target);
+  (target === 0 ? colA : colB).appendChild(div);
+
+  const w = getColWidth();
+  if (w > 0) {
+    const h = w * aspect;
+    div.style.height = h + 'px';
+    if (colEstHeights[target] > 0) colEstHeights[target] += GAP;
+    colEstHeights[target] += h;
+  }
   return div;
 });
 
-// 이미지 로드 후 두 flex 컬럼에 픽셀 정확도로 분배 + 끝단 일치
-function layoutMasonry() {
-  const gap = 6;
-  const colWidth = (grid.clientWidth - gap) / 2;
-  if (colWidth <= 0) return;
-
-  // 모든 이미지의 자연 사이즈가 준비되었는지 확인
-  const itemData = [];
-  for (const item of galleryItems) {
-    const img = item.querySelector('img');
-    if (!img.naturalWidth) return; // 모든 이미지 로드 후 다시 호출됨
-    const aspectRatio = img.naturalHeight / img.naturalWidth;
-    itemData.push({ item, height: colWidth * aspectRatio });
-  }
-
-  // 더 짧은 컬럼에 다음 이미지를 배치 (greedy 균형)
-  const cols = [
-    { el: colA, items: [], height: 0 },
-    { el: colB, items: [], height: 0 }
-  ];
-  itemData.forEach(d => {
-    const target = cols[0].height <= cols[1].height ? 0 : 1;
-    if (cols[target].items.length > 0) cols[target].height += gap;
-    cols[target].items.push({ ...d });
-    cols[target].height += d.height;
-  });
-
-  // 두 컬럼의 끝을 정확히 맞추기 위해 짧은 컬럼의 마지막 아이템 높이를 늘림
-  const diff = Math.abs(cols[0].height - cols[1].height);
-  const shorterIdx = cols[0].height < cols[1].height ? 0 : 1;
-  if (diff > 0 && cols[shorterIdx].items.length > 0) {
-    cols[shorterIdx].items[cols[shorterIdx].items.length - 1].height += diff;
-  }
-
-  // 컬럼 비우고 분배 결과 적용
-  colA.innerHTML = '';
-  colB.innerHTML = '';
-  cols.forEach(col => {
-    col.items.forEach(({ item, height }) => {
-      item.style.height = `${height}px`;
-      col.el.appendChild(item);
-    });
-  });
+// 한 아이템 높이만 실제 이미지 종횡비로 업데이트 (컬럼 이동 없음)
+function updateItemHeight(item) {
+  const img = item.querySelector('img');
+  if (!img || !img.naturalWidth) return;
+  const w = getColWidth();
+  if (w <= 0) return;
+  const aspect = img.naturalHeight / img.naturalWidth;
+  item.style.height = (w * aspect) + 'px';
 }
 
-// 모든 이미지 로드 완료를 기다려서 레이아웃 적용
+// 모든 이미지 로드 후 두 컬럼 끝단 맞추기 (짧은 컬럼 마지막 아이템 늘림)
+let equalized = false;
+function equalizeColumns() {
+  if (equalized) return;
+  const allReady = galleryItems.every(it => {
+    const img = it.querySelector('img');
+    return img && (img.naturalWidth > 0 || img.complete);
+  });
+  if (!allReady) return;
+
+  const hA = colA.scrollHeight;
+  const hB = colB.scrollHeight;
+  const diff = Math.abs(hA - hB);
+  if (diff > 1) {
+    const shorter = hA < hB ? colA : colB;
+    const last = shorter.lastElementChild;
+    if (last) {
+      const cur = last.getBoundingClientRect().height;
+      last.style.height = (cur + diff) + 'px';
+    }
+  }
+  equalized = true;
+}
+
+// 각 이미지 로드 시 자기 자신만 업데이트 (다른 아이템에 영향 없음)
 function waitForImages() {
-  const imgs = grid.querySelectorAll('img');
-  imgs.forEach(img => {
+  galleryItems.forEach(item => {
+    const img = item.querySelector('img');
+    if (!img) return;
+    const onSettled = () => {
+      updateItemHeight(item);
+      equalizeColumns();
+    };
     if (img.complete && img.naturalWidth > 0) {
-      layoutMasonry();
+      onSettled();
     } else {
-      img.addEventListener('load', layoutMasonry);
-      img.addEventListener('error', layoutMasonry);
+      img.addEventListener('load', onSettled, { once: true });
+      img.addEventListener('error', onSettled, { once: true });
     }
   });
 }
 waitForImages();
 
-// 윈도우 리사이즈 시 재레이아웃
+// 리사이즈 시: 컬럼 폭만 다시 반영, 컬럼 배치는 그대로 유지
 let resizeTimer;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(layoutMasonry, 150);
+  resizeTimer = setTimeout(() => {
+    galleryItems.forEach(updateItemHeight);
+    equalized = false;
+    equalizeColumns();
+  }, 150);
 });
 
 /* ========== 라이트박스 ========== */
