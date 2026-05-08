@@ -58,7 +58,6 @@
     /* 카톡 인앱 브라우저 확대 차단 */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    touch-action: pan-y;
     overflow-x: hidden;
   }
   html, body {
@@ -68,12 +67,11 @@
     line-height: 1.75;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
-    /* 스크롤 바운스 시 이미지 왜곡 방지 */
-    overscroll-behavior: contain;
-    /* 모바일 핀치 줌 차단 */
-    touch-action: pan-y;
-    /* iOS 스크롤 바운스 차단 */
-    -webkit-overflow-scrolling: auto;
+  }
+  body {
+    /* 안드로이드 크롬에서 overscroll-behavior + touch-action 조합이
+       세로 스크롤을 막는 사례가 있어 body 에만 단순화해 적용 */
+    overscroll-behavior-x: contain;
   }
   img {
     /* 모든 이미지 확대/축소 애니메이션 방지 */
@@ -85,7 +83,6 @@
   /* 히어로 영역에서는 모든 변형 차단 */
   .hero, .hero * {
     -webkit-touch-callout: none;
-    touch-action: pan-y;
   }
   .wrapper {
     max-width: 480px;
@@ -94,7 +91,9 @@
     position: relative;
     box-shadow: 0 0 60px rgba(0,0,0,0.08);
     min-height: 100vh;
-    overflow: hidden;
+    /* 가로 클리핑은 이미 html/body 의 overflow-x: hidden 으로 처리.
+       wrapper 에 overflow 를 걸지 않아야 안드로이드 크롬에서 페이지 높이
+       계산이 정상 동작해 세로 스크롤이 막히지 않는다. */
   }
 
   /* ===== 꽃잎/나뭇잎 흩날리는 효과 (좌상 → 우하) ===== */
@@ -180,8 +179,9 @@
     max-height: 900px;
     overflow: hidden;
     background: var(--forest-deep);
-    /* 레이아웃/페인트 격리 - 외부 영향 차단 */
-    contain: layout paint size style;
+    /* 안드로이드에서 contain: size 가 wrapper 높이 계산을 깨뜨려
+       세로 스크롤을 막는 사례가 있어 size 제외 (paint/layout만 유지) */
+    contain: layout paint;
     isolation: isolate;
   }
   /* --app-vh 미지원 시 폴백 */
@@ -220,8 +220,6 @@
     /* iOS Safari: 이미지 고정 렌더링 */
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    /* 리사이즈 시 재계산 방지 */
-    contain: strict;
   }
   .hero-overlay {
     position: absolute;
@@ -1344,7 +1342,7 @@
 (function() {
   // URL에 버전 파라미터가 없으면 추가하고 새로고침
   const urlParams = new URLSearchParams(window.location.search);
-  const currentVersion = 'v20260504-06'; // 배포할 때마다 이 값 변경!
+  const currentVersion = 'v20260504-08'; // 배포할 때마다 이 값 변경!
   const savedVersion = urlParams.get('v');
 
   if (savedVersion !== currentVersion) {
@@ -1677,43 +1675,50 @@
     setTimeout(setInitialVh, 100);
   });
 
-  // 더블 탭 확대 방지
-  let lastTouchEnd = 0;
-  document.addEventListener('touchend', function(e) {
-    const now = Date.now();
-    if (now - lastTouchEnd <= 300) {
-      e.preventDefault();
-    }
-    lastTouchEnd = now;
-  }, { passive: false });
+  // iOS Safari는 viewport user-scalable=no 를 무시하므로 JS preventDefault 가 필요.
+  // Android는 이미 viewport meta 로 핀치 줌이 차단되며, passive:false 핸들러를
+  // 추가하면 스크롤 지연/멈춤을 유발할 수 있어 iOS 에서만 활성화한다.
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-  // 멀티 터치 (핀치 줌) 차단
-  document.addEventListener('touchstart', function(e) {
-    if (e.touches.length > 1) {
-      e.preventDefault();
-    }
-  }, { passive: false });
+  if (isIOS) {
+    // 더블 탭 확대 방지 (iOS)
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function(e) {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, { passive: false });
 
-  document.addEventListener('touchmove', function(e) {
-    if (e.touches.length > 1) {
-      e.preventDefault();
-    }
-    // 스케일이 1이 아니면 강제로 1로 복귀
-    if (e.scale !== undefined && e.scale !== 1) {
-      e.preventDefault();
-    }
-  }, { passive: false });
+    // 멀티 터치(핀치 줌) 차단 (iOS)
+    document.addEventListener('touchstart', function(e) {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    }, { passive: false });
 
-  // 제스처 이벤트 차단 (iOS Safari)
-  document.addEventListener('gesturestart', function(e) {
-    e.preventDefault();
-  }, { passive: false });
-  document.addEventListener('gesturechange', function(e) {
-    e.preventDefault();
-  }, { passive: false });
-  document.addEventListener('gestureend', function(e) {
-    e.preventDefault();
-  }, { passive: false });
+    document.addEventListener('touchmove', function(e) {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+      if (e.scale !== undefined && e.scale !== 1) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    // 제스처 이벤트 차단 (iOS Safari 전용)
+    document.addEventListener('gesturestart', function(e) {
+      e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('gesturechange', function(e) {
+      e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('gestureend', function(e) {
+      e.preventDefault();
+    }, { passive: false });
+  }
 
   // Ctrl + 휠 확대 차단 (데스크톱)
   document.addEventListener('wheel', function(e) {
