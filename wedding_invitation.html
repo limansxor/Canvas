@@ -1324,6 +1324,125 @@
     color: var(--moss);
   }
 
+  /* ===== 축하 연락하기 (아코디언) ===== */
+  .contact-section {
+    background: linear-gradient(180deg, #f0ebdd 0%, var(--paper) 100%);
+    padding-top: 60px;
+    padding-bottom: 60px;
+  }
+  .contact-accordion {
+    max-width: 380px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .contact-group {
+    background: white;
+    border: 1px solid rgba(107, 85, 68, 0.15);
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(45, 58, 46, 0.05);
+  }
+  .contact-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: linear-gradient(180deg, #faf7ee 0%, white 100%);
+    border: none;
+    cursor: pointer;
+    font-family: 'Nanum Myeongjo', serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--forest-deep);
+    transition: background 0.3s;
+  }
+  .contact-toggle:hover {
+    background: #f5f0e2;
+  }
+  .contact-toggle-icon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.35s ease;
+    color: var(--forest-soft);
+    flex-shrink: 0;
+  }
+  .contact-group.open .contact-toggle-icon {
+    transform: rotate(180deg);
+  }
+  .contact-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .contact-group.open .contact-body {
+    max-height: 300px;
+  }
+  .contact-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-top: 1px solid rgba(107, 85, 68, 0.08);
+  }
+  .contact-row:first-child {
+    border-top: 1px solid rgba(107, 85, 68, 0.12);
+  }
+  .contact-info {
+    font-family: 'Gowun Batang', serif;
+    font-size: 13.5px;
+    color: var(--forest-mid);
+    line-height: 1.5;
+  }
+  .contact-info .contact-role {
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    margin-right: 8px;
+  }
+  .contact-info .contact-name {
+    color: var(--forest-deep);
+    font-weight: 700;
+  }
+  .contact-btns {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .contact-call-btn,
+  .contact-sms-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(107, 85, 68, 0.2);
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    text-decoration: none;
+  }
+  .contact-call-btn:hover,
+  .contact-sms-btn:hover {
+    background: var(--forest-mid);
+    border-color: var(--forest-mid);
+  }
+  .contact-call-btn:hover svg,
+  .contact-sms-btn:hover svg {
+    color: var(--cream);
+  }
+  .contact-call-btn svg,
+  .contact-sms-btn svg {
+    width: 16px;
+    height: 16px;
+    color: var(--forest-mid);
+    transition: color 0.3s;
+  }
+
   /* ===== 장식 요소 ===== */
   .ornament {
     text-align: center;
@@ -1342,7 +1461,7 @@
 (function() {
   // URL에 버전 파라미터가 없으면 추가하고 새로고침
   const urlParams = new URLSearchParams(window.location.search);
-  const currentVersion = 'v20260504-08'; // 배포할 때마다 이 값 변경!
+  const currentVersion = 'v20260513-01'; // 배포할 때마다 이 값 변경!
   const savedVersion = urlParams.get('v');
 
   if (savedVersion !== currentVersion) {
@@ -1447,6 +1566,139 @@
       <span class="family-relation">의 딸</span>
       <span class="family-child">지 연</span>
     </div>
+    </div>
+  </section>
+
+  <!-- 축하 연락하기 -->
+  <section class="contact-section">
+    <div class="section-label reveal">CONTACT</div>
+    <h2 class="section-title reveal delay-1">축 하 연 락</h2>
+    <div class="contact-accordion reveal delay-2">
+
+      <!-- 신랑측 -->
+      <div class="contact-group" id="contactGroom">
+        <button class="contact-toggle" onclick="toggleContact('contactGroom')">
+          <span>신랑에게 연락하기</span>
+          <svg class="contact-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="contact-body">
+          <div class="contact-row">
+            <div class="contact-info">
+              <span class="contact-role">신랑</span>
+              <span class="contact-name">임문택</span>
+            </div>
+            <div class="contact-btns">
+              <a class="contact-call-btn" href="tel:01043112405" aria-label="전화">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </a>
+              <a class="contact-sms-btn" href="sms:01043112405" aria-label="문자">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 신랑측 혼주 -->
+      <div class="contact-group" id="contactGroomParents">
+        <button class="contact-toggle" onclick="toggleContact('contactGroomParents')">
+          <span>신랑 혼주에게 연락하기</span>
+          <svg class="contact-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="contact-body">
+          <div class="contact-row">
+            <div class="contact-info">
+              <span class="contact-role">아버지</span>
+              <span class="contact-name">임종진</span>
+            </div>
+            <div class="contact-btns">
+              <a class="contact-call-btn" href="tel:01034302405" aria-label="전화">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </a>
+              <a class="contact-sms-btn" href="sms:01034302405" aria-label="문자">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </a>
+            </div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-info">
+              <span class="contact-role">어머니</span>
+              <span class="contact-name">정혜윤</span>
+            </div>
+            <div class="contact-btns">
+              <a class="contact-call-btn" href="tel:01042392405" aria-label="전화">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </a>
+              <a class="contact-sms-btn" href="sms:01042392405" aria-label="문자">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 신부측 -->
+      <div class="contact-group" id="contactBride">
+        <button class="contact-toggle" onclick="toggleContact('contactBride')">
+          <span>신부에게 연락하기</span>
+          <svg class="contact-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="contact-body">
+          <div class="contact-row">
+            <div class="contact-info">
+              <span class="contact-role">신부</span>
+              <span class="contact-name">장지연</span>
+            </div>
+            <div class="contact-btns">
+              <a class="contact-call-btn" href="tel:01020842751" aria-label="전화">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </a>
+              <a class="contact-sms-btn" href="sms:01020842751" aria-label="문자">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 신부측 혼주 -->
+      <div class="contact-group" id="contactBrideParents">
+        <button class="contact-toggle" onclick="toggleContact('contactBrideParents')">
+          <span>신부 혼주에게 연락하기</span>
+          <svg class="contact-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="contact-body">
+          <div class="contact-row">
+            <div class="contact-info">
+              <span class="contact-role">아버지</span>
+              <span class="contact-name">장영철</span>
+            </div>
+            <div class="contact-btns">
+              <a class="contact-call-btn" href="tel:01073235345" aria-label="전화">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </a>
+              <a class="contact-sms-btn" href="sms:01073235345" aria-label="문자">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </a>
+            </div>
+          </div>
+          <div class="contact-row">
+            <div class="contact-info">
+              <span class="contact-role">어머니</span>
+              <span class="contact-name">박영순</span>
+            </div>
+            <div class="contact-btns">
+              <a class="contact-call-btn" href="tel:01021665348" aria-label="전화">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </a>
+              <a class="contact-sms-btn" href="sms:01021665348" aria-label="문자">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -2292,6 +2544,13 @@ function copyAccount(btn, text) {
       btn.classList.remove('copied');
     }, 2000);
   });
+}
+
+/* ========== 축하 연락하기 아코디언 ========== */
+function toggleContact(id) {
+  const group = document.getElementById(id);
+  if (!group) return;
+  group.classList.toggle('open');
 }
 
 // ESC로 라이트박스 닫기
