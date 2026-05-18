@@ -903,9 +903,10 @@
     max-width: 100%;
     max-height: 90vh;
     object-fit: contain;
-    touch-action: pinch-zoom;
+    touch-action: none;
     transform-origin: center center;
-    transition: transform 0.1s ease;
+    user-select: none;
+    -webkit-user-drag: none;
   }
   .lightbox-close {
     position: absolute;
@@ -2224,22 +2225,112 @@ window.addEventListener('resize', () => {
   }, 150);
 });
 
-/* ========== 라이트박스 ========== */
+/* ========== 라이트박스 (핀치 줌 지원) ========== */
 let currentIdx = 0;
+let lbScale = 1, lbPanX = 0, lbPanY = 0;
+let lbStartDist = 0, lbStartScale = 1;
+let lbStartPanX = 0, lbStartPanY = 0, lbStartMidX = 0, lbStartMidY = 0;
+let lbIsPinching = false, lbIsPanning = false;
+let lbPanStartX = 0, lbPanStartY = 0;
+
+const lbImg = document.getElementById('lightboxImg');
+
+function lbResetZoom() {
+  lbScale = 1; lbPanX = 0; lbPanY = 0;
+  lbImg.style.transform = 'translate(0px, 0px) scale(1)';
+}
+
+function lbApplyTransform() {
+  lbImg.style.transform = `translate(${lbPanX}px, ${lbPanY}px) scale(${lbScale})`;
+}
+
+function getTouchDist(t) {
+  const dx = t[0].clientX - t[1].clientX;
+  const dy = t[0].clientY - t[1].clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function getTouchMid(t) {
+  return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 };
+}
+
+// 라이트박스 터치 이벤트
+lbImg.addEventListener('touchstart', function(e) {
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    lbIsPinching = true;
+    lbIsPanning = false;
+    lbStartDist = getTouchDist(e.touches);
+    lbStartScale = lbScale;
+    const mid = getTouchMid(e.touches);
+    lbStartMidX = mid.x; lbStartMidY = mid.y;
+    lbStartPanX = lbPanX; lbStartPanY = lbPanY;
+  } else if (e.touches.length === 1 && lbScale > 1) {
+    lbIsPanning = true;
+    lbPanStartX = e.touches[0].clientX - lbPanX;
+    lbPanStartY = e.touches[0].clientY - lbPanY;
+  }
+}, { passive: false });
+
+lbImg.addEventListener('touchmove', function(e) {
+  if (lbIsPinching && e.touches.length === 2) {
+    e.preventDefault();
+    const dist = getTouchDist(e.touches);
+    lbScale = Math.min(Math.max(lbStartScale * (dist / lbStartDist), 1), 5);
+    const mid = getTouchMid(e.touches);
+    lbPanX = lbStartPanX + (mid.x - lbStartMidX);
+    lbPanY = lbStartPanY + (mid.y - lbStartMidY);
+    lbApplyTransform();
+  } else if (lbIsPanning && e.touches.length === 1 && lbScale > 1) {
+    e.preventDefault();
+    lbPanX = e.touches[0].clientX - lbPanStartX;
+    lbPanY = e.touches[0].clientY - lbPanStartY;
+    lbApplyTransform();
+  }
+}, { passive: false });
+
+lbImg.addEventListener('touchend', function(e) {
+  if (e.touches.length < 2) lbIsPinching = false;
+  if (e.touches.length < 1) lbIsPanning = false;
+  // 스케일이 1 이하면 리셋
+  if (lbScale <= 1.05) lbResetZoom();
+});
+
+// 더블탭 줌 토글
+let lbLastTap = 0;
+lbImg.addEventListener('touchend', function(e) {
+  if (e.touches.length > 0) return;
+  const now = Date.now();
+  if (now - lbLastTap < 300) {
+    e.preventDefault();
+    if (lbScale > 1.1) {
+      lbResetZoom();
+    } else {
+      lbScale = 2.5;
+      lbPanX = 0; lbPanY = 0;
+      lbApplyTransform();
+    }
+  }
+  lbLastTap = now;
+}, { passive: false });
+
 function openLightbox(i) {
   currentIdx = i;
-  document.getElementById('lightboxImg').src = allImages[i];
+  lbResetZoom();
+  lbImg.src = allImages[i];
   document.getElementById('lightbox').classList.add('active');
 }
 function closeLightbox() {
   document.getElementById('lightbox').classList.remove('active');
+  lbResetZoom();
 }
 function navLightbox(dir) {
   currentIdx = (currentIdx + dir + allImages.length) % allImages.length;
-  document.getElementById('lightboxImg').src = allImages[currentIdx];
+  lbResetZoom();
+  lbImg.src = allImages[currentIdx];
 }
 document.getElementById('lightbox').addEventListener('click', (e) => {
-  if (e.target.id === 'lightbox') closeLightbox();
+  if (e.target.id === 'lightbox' && lbScale <= 1.05) closeLightbox();
 });
 
 /* ========== 약도 확대 보기 ========== */
